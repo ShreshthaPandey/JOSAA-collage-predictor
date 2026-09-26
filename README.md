@@ -1,7 +1,7 @@
 JOSAA College Predictor
 
 
-###Data Preprocessing
+## Data Preprocessing
 Downloaded the JoSAA Opening & Closing Ranks Dataset (2016–2026) from Kaggle.
 Removed data files from 2016–2019 and retained 2020–2026 data.
 Loaded individual CSV files using Pandas.
