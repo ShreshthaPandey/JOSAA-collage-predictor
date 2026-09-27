@@ -16,3 +16,170 @@ JOSAA College Predictor
 * Performed **group-by and sorting operations** for college-wise and rank-based analysis.
 * Verified the cleaned dataset before proceeding to further analysis and feature engineering.
 
+# 🎓 JoSAA College & Rank Prediction
+
+## 📌 Project Overview
+
+This project uses **JoSAA Opening and Closing Rank data** to analyze college admission trends and build a machine learning model for rank prediction.
+
+The dataset contains information about institutes, academic programs, quota, category, gender, PwD status, counselling rounds, years, and opening/closing ranks.
+
+---
+
+## ✅ Work Completed
+
+### 1. Data Cleaning
+
+* Inspected categorical columns such as:
+
+  * Institute
+  * Academic Program Name
+  * Quota
+  * Seat Type
+  * Gender
+* Checked category frequencies using `value_counts()`.
+* Removed leading and trailing whitespace from categorical values.
+
+```python
+df['Seat Type'] = df['Seat Type'].str.strip()
+```
+
+---
+
+### 2. PwD Feature Engineering
+
+Separated PwD information from the `Seat Type` column.
+
+Created a new feature:
+
+```python
+df['is_pwd']
+```
+
+Encoding:
+
+* `0` → Non-PwD
+* `1` → PwD
+
+Example:
+
+| Seat Type  | Category | is_pwd |
+| ---------- | -------- | -----: |
+| OPEN       | OPEN     |      0 |
+| OPEN (PwD) | OPEN     |      1 |
+| SC         | SC       |      0 |
+| SC (PwD)   | SC       |      1 |
+
+---
+
+### 3. Category Extraction
+
+Removed `(PwD)` from `Seat Type` to create a clean category column.
+
+```python
+df['category'] = (
+    df['Seat Type']
+    .str.replace(r'\s*\(PwD\)', '', regex=True)
+    .str.strip()
+)
+```
+
+Main categories:
+
+```text
+OPEN
+OBC-NCL
+SC
+EWS
+ST
+```
+
+PwD information is stored separately in `is_pwd`.
+
+---
+
+### 4. Categorical Data Analysis
+
+Analyzed the distribution of:
+
+* Seat Type
+* Category
+* Quota
+* Academic Program Name
+* Gender
+* PwD status
+
+Used frequency counts and bar charts to understand the dataset.
+
+For columns with many unique values, such as Academic Program Name, a **Top-N visualization** was used for better readability.
+
+---
+
+### 5. Year & Round
+
+`Year` and `Round` were identified as naturally ordered numerical features.
+
+They can be kept as numerical values rather than unnecessarily applying `LabelEncoder`.
+
+```python
+df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
+df['Round'] = pd.to_numeric(df['Round'], errors='coerce')
+```
+
+---
+
+### 6. Feature Engineering
+
+Created/considered useful rank-based features:
+
+```python
+df['rank_range'] = df['Closing Rank'] - df['Opening Rank']
+
+df['avg_rank'] = (
+    df['Opening Rank'] + df['Closing Rank']
+) / 2
+
+df['rank_ratio'] = (
+    df['Closing Rank'] / df['Opening Rank']
+)
+```
+
+Also considered log transformations:
+
+```python
+df['log_opening_rank'] = np.log1p(df['Opening Rank'])
+df['log_closing_rank'] = np.log1p(df['Closing Rank'])
+```
+
+> ⚠️ Features directly derived from the target variable must not be used for prediction because they can cause **data leakage**.
+
+---
+
+## 📊 Current Important Columns
+
+```text
+Institute
+Academic Program Name
+Quota
+Seat Type
+Gender
+Opening Rank
+Closing Rank
+Round
+Year
+is_pwd
+category
+```
+
+
+
+## 🛠️ Technologies
+
+* Python
+* Pandas
+* NumPy
+* Matplotlib
+* Seaborn
+* Scikit-learn
+* XGBoost
+* Streamlit
