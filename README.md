@@ -288,3 +288,176 @@ College + Branch + Round + Chance
 
 GitHub: `ShreshthaPandey/JOSAA-collage-predictor`
 
+## Model Reload and Prediction
+
+After training, the trained Random Forest model and supporting objects are saved using Joblib.
+
+### Load Saved Model
+
+```python
+import joblib
+
+best_model = joblib.load("model/random_forest_model.pkl")
+encoders = joblib.load("model/encoders.pkl")
+features = joblib.load("model/features.pkl")
+```
+
+### Loaded Components
+
+* `random_forest_model.pkl` → Trained Random Forest regression model
+* `encoders.pkl` → Label encoders used for categorical features
+* `features.pkl` → Final feature list used by the model
+
+### Prediction Pipeline
+
+The saved model can be used without retraining:
+
+```text
+User Input
+    ↓
+Exam Selection
+    ↓
+Category / Quota / Gender / PwD Filtering
+    ↓
+College + Branch Candidates
+    ↓
+Categorical Encoding
+    ↓
+Feature Selection
+    ↓
+Random Forest Model
+    ↓
+Predicted Closing Rank
+    ↓
+Compare Student Rank
+    ↓
+Chance Category
+    ↓
+Final College Recommendations
+```
+
+### Student Inputs
+
+The predictor takes:
+
+* Exam: JEE Main / JEE Advanced
+* Category
+* Quota
+* Gender
+* PwD status
+* Student Rank
+
+### Exam Filtering
+
+For JEE Advanced, only IITs are considered.
+
+```python
+if exam == "JEE Advanced":
+    exam_df = df[df["Institute_Type"] == "IIT"].copy()
+else:
+    exam_df = df[df["Institute_Type"] != "IIT"].copy()
+```
+
+For JEE Main, IITs are excluded and the remaining institutes such as NITs, IIITs and GFTIs are considered.
+
+### Student-Specific Filtering
+
+The dataset is filtered according to:
+
+```text
+Category
+Quota
+Gender
+PwD status
+```
+
+This ensures that recommendations are based on the student's selected admission conditions.
+
+### Closing Rank Prediction
+
+For each valid college and branch combination, the saved Random Forest model predicts the closing rank.
+
+The prediction is stored as:
+
+```python
+latest_options["Predicted_Closing_Rank"] = predicted_closing
+```
+
+### Rank Comparison
+
+The student's rank is compared with the predicted closing rank:
+
+```python
+latest_options["Rank_Difference"] = (
+    latest_options["Predicted_Closing_Rank"] - rank
+)
+```
+
+A positive difference means the predicted closing rank is numerically greater than the student's rank.
+
+### Chance Classification
+
+The current prototype uses a margin-based heuristic:
+
+```python
+def get_chance(margin):
+    if margin >= 5:
+        return "HIGH"
+    elif margin >= 0:
+        return "MEDIUM"
+    else:
+        return "LOW"
+```
+
+> **Note:** HIGH, MEDIUM and LOW are heuristic categories based on predicted closing rank. They are not calibrated admission probabilities.
+
+### Final Output
+
+The predictor returns:
+
+| Column                 | Description                  |
+| ---------------------- | ---------------------------- |
+| Institute              | College/institute name       |
+| Branch                 | Academic program             |
+| Opening Rank           | Historical opening rank      |
+| Closing Rank           | Historical closing rank      |
+| Predicted Closing Rank | Model-predicted closing rank |
+| Round                  | JoSAA counselling round      |
+| Year                   | Data year                    |
+| Chance                 | HIGH / MEDIUM / LOW          |
+
+The final results are sorted by:
+
+```text
+HIGH
+   ↓
+MEDIUM
+   ↓
+LOW
+```
+
+and then by predicted closing rank.
+
+### Important Model Validation
+
+For future prediction, the model should be evaluated using a time-based split:
+
+```text
+Training Data → 2020–2025
+Testing Data  → 2026
+```
+
+This is more representative of the intended use case than randomly mixing historical years between training and testing.
+
+### Current Validation Result
+
+The Random Forest evaluation obtained:
+
+```text
+MAE  : 1665.11
+RMSE : 12073.89
+R²   : 0.8984
+```
+
+These metrics should be clearly labeled according to the exact train/test split used when the final model is documented.
+
