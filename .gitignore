@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model files
+*.pkl
+# Dataset archives
+*dataset/
+*catboost_info/
+*.pkl
+*.zip
+
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
