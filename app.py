@@ -23,48 +23,68 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-[data-testid="stAppViewContainer"] {
-    background: #0f172a;
-    color: #f1f5f9;
+html, body, [class*="css"] {
+    color: #f1f5f9 !important;
 }
 
-[data-testid="stSidebar"] {
-    background: #1e293b !important;
-    border-right: 1px solid #334155;
+[data-testid="stAppViewContainer"] {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+}
+
+[data-testid="stMain"] {
+    background-color: #0f172a !important;
 }
 
 [data-testid="stHeader"] {
-    background: #1e293b;
-    border-bottom: 1px solid #334155;
+    background-color: #0f172a !important;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #1e293b !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff !important;
 }
 
 .stButton > button {
-    background: linear-gradient(135deg, #1d4ed8, #3b82f6) !important;
-    color: white !important;
+    background: linear-gradient(
+        135deg,
+        #1d4ed8,
+        #3b82f6
+    ) !important;
+
+    color: #ffffff !important;
     border: none !important;
-    border-radius: 10px !important;
-    padding: 12px 24px !important;
-    font-weight: 600 !important;
-    width: 100% !important;
-    font-size: 15px !important;
-    box-shadow: 0 4px 16px rgba(59,130,246,.3) !important;
 }
 
-.stButton > button:hover {
-    opacity: 0.9 !important;
-    transform: translateY(-1px) !important;
+input, textarea {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border: 1px solid #475569 !important;
+}
+
+[data-baseweb="select"] > div {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+}
+
+[data-baseweb="select"] span {
+    color: #ffffff !important;
 }
 
 [data-testid="stMetric"] {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 16px !important;
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+}
+
+[data-testid="stMetricValue"] {
+    color: #ffffff !important;
 }
 
 </style>
 """, unsafe_allow_html=True)
-
 
 # ════════════════════════════════════════════════════
 # LOAD MODEL
