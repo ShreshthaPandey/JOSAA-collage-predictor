@@ -1,213 +1,85 @@
-JOSAA College Predictor
-
-
-## Data Preprocessing
-
-* Downloaded the **JoSAA Opening & Closing Ranks Dataset (2016–2026)** from Kaggle.
-* Removed records from **2016–2019** and retained data from **2020–2026**.
-* Loaded and inspected individual CSV files using **Pandas**.
-* Merged all counselling rounds for each year into a single yearly dataset.
-* Added a **`round`** column to identify the counselling round.
-* Combined all yearly datasets into a single dataset and added a **`year`** column.
-* Checked dataset dimensions, column names, data types, and missing values.
-* Identified and handled special rank values containing **`P`**.
-* Detected and removed rows containing **infinite (`inf`) rank values**.
-* Converted **Opening Rank** and **Closing Rank** into integer format.
-* Performed **group-by and sorting operations** for college-wise and rank-based analysis.
-* Verified the cleaned dataset before proceeding to further analysis and feature engineering.
-
-# 🎓 JoSAA College & Rank Prediction
-
-## 📌 Project Overview
-
-This project uses **JoSAA Opening and Closing Rank data** to analyze college admission trends and build a machine learning model for rank prediction.
-
-The dataset contains information about institutes, academic programs, quota, category, gender, PwD status, counselling rounds, years, and opening/closing ranks.
-
----
-
-## ✅ Work Completed
-
-### 1. Data Cleaning
-
-* Inspected categorical columns such as:
-
-  * Institute
-  * Academic Program Name
-  * Quota
-  * Seat Type
-  * Gender
-* Checked category frequencies using `value_counts()`.
-* Removed leading and trailing whitespace from categorical values.
-
-```python
-df['Seat Type'] = df['Seat Type'].str.strip()
-```
-
----
-
-### 2. PwD Feature Engineering
-
-Separated PwD information from the `Seat Type` column.
-
-Created a new feature:
-
-```python
-df['is_pwd']
-```
-
-Encoding:
-
-* `0` → Non-PwD
-* `1` → PwD
-
-Example:
-
-| Seat Type  | Category | is_pwd |
-| ---------- | -------- | -----: |
-| OPEN       | OPEN     |      0 |
-| OPEN (PwD) | OPEN     |      1 |
-| SC         | SC       |      0 |
-| SC (PwD)   | SC       |      1 |
-
----
-
-### 3. Category Extraction
-
-Removed `(PwD)` from `Seat Type` to create a clean category column.
-
-```python
-df['category'] = (
-    df['Seat Type']
-    .str.replace(r'\s*\(PwD\)', '', regex=True)
-    .str.strip()
-)
-```
-
-Main categories:
-
-```text
-OPEN
-OBC-NCL
-SC
-EWS
-ST
-```
-
-PwD information is stored separately in `is_pwd`.
-
----
-
-### 4. Categorical Data Analysis
-
-Analyzed the distribution of:
-
-* Seat Type
-* Category
-* Quota
-* Academic Program Name
-* Gender
-* PwD status
-
-Used frequency counts and bar charts to understand the dataset.
-
-For columns with many unique values, such as Academic Program Name, a **Top-N visualization** was used for better readability.
-
----
-
-### 5. Year & Round
-
-`Year` and `Round` were identified as naturally ordered numerical features.
-
-They can be kept as numerical values rather than unnecessarily applying `LabelEncoder`.
-
-```python
-df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
-df['Round'] = pd.to_numeric(df['Round'], errors='coerce')
-```
-
----
-
-### 6. Feature Engineering
-
-Created/considered useful rank-based features:
-
-```python
-df['rank_range'] = df['Closing Rank'] - df['Opening Rank']
-
-df['avg_rank'] = (
-    df['Opening Rank'] + df['Closing Rank']
-) / 2
-
-df['rank_ratio'] = (
-    df['Closing Rank'] / df['Opening Rank']
-)
-```
-
-Also considered log transformations:
-
-```python
-df['log_opening_rank'] = np.log1p(df['Opening Rank'])
-df['log_closing_rank'] = np.log1p(df['Closing Rank'])
-```
-
-> ⚠️ Features directly derived from the target variable must not be used for prediction because they can cause **data leakage**.
-
----
-
-## 📊 Current Important Columns
-
-```text
-Institute
-Academic Program Name
-Quota
-Seat Type
-Gender
-Opening Rank
-Closing Rank
-Round
-Year
-is_pwd
-category
-```
-
 
 
 # 🎓 JOSAA College Predictor
 
-A Machine Learning-based college predictor using **JOSAA Opening & Closing Rank data (2020–2026)** to predict closing ranks and help estimate suitable college/branch options.
+A Machine Learning based **JOSAA College Predictor** that estimates college closing ranks and provides personalized college and branch recommendations based on a student's JEE rank, category, quota, gender, and PwD status.
 
-## 📊 Dataset
+The project uses historical JOSAA counselling data from **2020–2026** and a **Random Forest Regression** model.
 
-* **Source:** JOSAA Opening & Closing Ranks Dataset
-* **Years Used:** 2020–2026
-* **Original Records:** 366,914
-* **Data after cleaning/filtering:** ~259K records
-* **Rounds Used:** 1–5
-* **Institutes:** 135
-* **Academic Programs:** 292
-* **Quotas:** 4
-* **Gender Categories:** 2
-* **Categories:** 5
-* **Institute Types:** 4
+---
+
+## 🚀 Features
+
+* 🎯 JEE Main and JEE Advanced prediction
+* 🏫 IIT filtering for JEE Advanced
+* 🏛️ NIT, IIIT and GFTI options for JEE Main
+* 📊 Historical JOSAA rank analysis
+* 🤖 Random Forest based closing-rank prediction
+* 🔍 Category, quota, gender and PwD filtering
+* 📈 Historical average, trend and volatility features
+* 🎯 HIGH / MEDIUM / LOW chance classification
+* 🖥️ Interactive Streamlit web interface
+* 📋 College and branch recommendations in table format
+
+---
+
+## 📂 Dataset
+
+**Source:** Kaggle — JOSAA Opening and Closing Ranks Dataset
+
+**Years used:** 2020–2026
+
+Original data contained counselling information such as:
+
+* Institute
+* Academic Program
+* Quota
+* Seat Type / Category
+* Gender
+* Opening Rank
+* Closing Rank
+* Round
+* Year
+
+Rows containing invalid rank values such as `P` and missing/infinite ranks were cleaned before model training.
+
+---
 
 ## 🧹 Data Preprocessing
 
-* Removed data from **2016–2019**
-* Removed invalid ranks containing `P`
-* Converted Opening/Closing Rank to numeric
-* Removed `NaN` and infinite rank values
-* Restricted counselling rounds to **1–5**
-* Cleaned whitespace from categorical columns
-* Created `is_pwd` feature from quota information
+The following preprocessing steps were performed:
+
+1. Extracted yearly JOSAA datasets.
+2. Removed data from 2016–2019.
+3. Merged yearly and round-wise datasets.
+4. Removed invalid rank values.
+5. Converted Opening and Closing Rank to numeric values.
+6. Removed missing/infinite rank values.
+7. Kept counselling rounds up to Round 5.
+8. Cleaned column names and categorical values.
+9. Created additional features such as:
+
+   * `is_pwd`
+   * `Institute_Type`
+
+Institute types include:
+
+* IIT
+* NIT
+* IIIT
+* GFTI
+
+---
 
 ## ⚙️ Feature Engineering
 
-Created historical features using previous rank data:
+Historical features were created without using the current/future closing rank:
 
 * `hist_avg_closing` — rolling historical average closing rank
 * `hist_trend` — historical closing-rank trend
 * `hist_volatility` — historical closing-rank variation
+
+Categorical features were encoded using `LabelEncoder`.
 
 ### Final Model Features
 
@@ -227,237 +99,219 @@ hist_trend
 hist_volatility
 ```
 
-**Target:** `Closing_Rank`
-
-## 🤖 Models Compared
-
-* Random Forest
-* XGBoost
-* LightGBM
-* CatBoost
-
-### Earlier Model Comparison
-
-| Model         |         MAE |         RMSE |         R² |
-| ------------- | ----------: | -----------: | ---------: |
-| Random Forest | **1665.11** | **12073.89** | **0.8984** |
-| XGBoost       |     1807.16 |     12825.03 |     0.8853 |
-| LightGBM      |     1896.67 |     12635.64 |     0.8887 |
-| CatBoost      |     1886.52 |     12872.45 |     0.8845 |
-
-Random Forest was the best model in this evaluation based on MAE, RMSE and R².
-
-## 💾 Model Saving
-
-Saved the trained model and preprocessing information using Joblib:
+### Target
 
 ```text
-model/
-├── random_forest_model.pkl
-├── encoders.pkl
-└── features.pkl
+Closing_Rank
 ```
 
-* `random_forest_model.pkl` → trained ML model
-* `encoders.pkl` → categorical encoders
-* `features.pkl` → feature order used during training
+---
 
-## 🚀 Prediction Flow
+## 🤖 Machine Learning Models
 
-```text
-User Input
-   ↓
-Category + Rank + Quota + Gender + PwD
-   ↓
-Feature Encoding
-   ↓
-Historical Features
-   ↓
-Random Forest Model
-   ↓
-Predicted Closing Rank
-   ↓
-College + Branch + Round + Chance
-```
+Several regression models were evaluated:
 
-## 🛠️ Tech Stack
+| Model         |         MAE |     RMSE |         R² |
+| ------------- | ----------: | -------: | ---------: |
+| Random Forest | **1655.24** | 12292.44 | **0.9013** |
+| XGBoost       |     1951.64 | 13517.05 |     0.8806 |
+| LightGBM      |     1967.25 | 12817.27 |     0.8926 |
+| CatBoost      |     2098.24 | 13459.51 |     0.8816 |
 
-**Python | Pandas | NumPy | Scikit-learn | Random Forest | XGBoost | LightGBM | CatBoost | Joblib | Streamlit**
+Based on the time-based evaluation, **Random Forest Regression** was selected as the final model.
 
-## 📌 Repository
-
-GitHub: `ShreshthaPandey/JOSAA-collage-predictor`
-
-## Model Reload and Prediction
-
-After training, the trained Random Forest model and supporting objects are saved using Joblib.
-
-### Load Saved Model
+Final configuration:
 
 ```python
-import joblib
-
-best_model = joblib.load("model/random_forest_model.pkl")
-encoders = joblib.load("model/encoders.pkl")
-features = joblib.load("model/features.pkl")
-```
-
-### Loaded Components
-
-* `random_forest_model.pkl` → Trained Random Forest regression model
-* `encoders.pkl` → Label encoders used for categorical features
-* `features.pkl` → Final feature list used by the model
-
-### Prediction Pipeline
-
-The saved model can be used without retraining:
-
-```text
-User Input
-    ↓
-Exam Selection
-    ↓
-Category / Quota / Gender / PwD Filtering
-    ↓
-College + Branch Candidates
-    ↓
-Categorical Encoding
-    ↓
-Feature Selection
-    ↓
-Random Forest Model
-    ↓
-Predicted Closing Rank
-    ↓
-Compare Student Rank
-    ↓
-Chance Category
-    ↓
-Final College Recommendations
-```
-
-### Student Inputs
-
-The predictor takes:
-
-* Exam: JEE Main / JEE Advanced
-* Category
-* Quota
-* Gender
-* PwD status
-* Student Rank
-
-### Exam Filtering
-
-For JEE Advanced, only IITs are considered.
-
-```python
-if exam == "JEE Advanced":
-    exam_df = df[df["Institute_Type"] == "IIT"].copy()
-else:
-    exam_df = df[df["Institute_Type"] != "IIT"].copy()
-```
-
-For JEE Main, IITs are excluded and the remaining institutes such as NITs, IIITs and GFTIs are considered.
-
-### Student-Specific Filtering
-
-The dataset is filtered according to:
-
-```text
-Category
-Quota
-Gender
-PwD status
-```
-
-This ensures that recommendations are based on the student's selected admission conditions.
-
-### Closing Rank Prediction
-
-For each valid college and branch combination, the saved Random Forest model predicts the closing rank.
-
-The prediction is stored as:
-
-```python
-latest_options["Predicted_Closing_Rank"] = predicted_closing
-```
-
-### Rank Comparison
-
-The student's rank is compared with the predicted closing rank:
-
-```python
-latest_options["Rank_Difference"] = (
-    latest_options["Predicted_Closing_Rank"] - rank
+RandomForestRegressor(
+    n_estimators=100,
+    max_depth=15,
+    min_samples_split=5,
+    min_samples_leaf=5,
+    max_features=0.8,
+    random_state=42,
+    n_jobs=2
 )
 ```
 
-A positive difference means the predicted closing rank is numerically greater than the student's rank.
-
-### Chance Classification
-
-The current prototype uses a margin-based heuristic:
-
-```python
-def get_chance(margin):
-    if margin >= 5:
-        return "HIGH"
-    elif margin >= 0:
-        return "MEDIUM"
-    else:
-        return "LOW"
-```
-
-> **Note:** HIGH, MEDIUM and LOW are heuristic categories based on predicted closing rank. They are not calibrated admission probabilities.
-
-### Final Output
-
-The predictor returns:
-
-| Column                 | Description                  |
-| ---------------------- | ---------------------------- |
-| Institute              | College/institute name       |
-| Branch                 | Academic program             |
-| Opening Rank           | Historical opening rank      |
-| Closing Rank           | Historical closing rank      |
-| Predicted Closing Rank | Model-predicted closing rank |
-| Round                  | JoSAA counselling round      |
-| Year                   | Data year                    |
-| Chance                 | HIGH / MEDIUM / LOW          |
-
-The final results are sorted by:
+### Final Evaluation
 
 ```text
-HIGH
-   ↓
-MEDIUM
-   ↓
-LOW
+Training R² : 0.9868
+Testing R²  : 0.9045
 ```
 
-and then by predicted closing rank.
+The model was evaluated using a time-based split, with historical years used for training and **2026 as the test year**.
 
-### Important Model Validation
+---
 
-For future prediction, the model should be evaluated using a time-based split:
+## 🎯 Prediction System
+
+The application takes:
 
 ```text
-Training Data → 2020–2025
-Testing Data  → 2026
+Exam
+Rank
+Category
+Quota
+Gender
+PwD Status
 ```
 
-This is more representative of the intended use case than randomly mixing historical years between training and testing.
-
-### Current Validation Result
-
-The Random Forest evaluation obtained:
+The system then:
 
 ```text
-MAE  : 1665.11
-RMSE : 12073.89
-R²   : 0.8984
+User Input
+    ↓
+Filter eligible institutes
+    ↓
+Apply category/quota/gender/PwD filters
+    ↓
+Generate model predictions
+    ↓
+Compare student rank with predicted closing rank
+    ↓
+Assign Chance
+    ↓
+Display College + Branch
 ```
 
-These metrics should be clearly labeled according to the exact train/test split used when the final model is documented.
+Chance levels:
 
+* 🟢 **HIGH**
+* 🟡 **MEDIUM**
+* 🔴 **LOW**
+
+These are guidance categories based on the predicted closing rank and are **not guaranteed admission probabilities**.
+
+---
+
+## 🖥️ Streamlit Application
+
+The application contains two main screens.
+
+### 1. Landing Page
+
+* Project introduction
+* ML/data-driven highlights
+* Blue gradient UI
+* **LET'S START** button
+
+### 2. Predictor Dashboard
+
+Users enter their JEE details and receive:
+
+| College Name | Branch | College Type | Chances |
+| ------------ | ------ | ------------ | ------- |
+
+The interface uses a clean blue-gradient theme with card-based components.
+
+---
+
+## 📁 Project Structure
+
+```text
+JOSAA-collage-predictor/
+│
+├── app.py
+├── clg_predictor.ipynb
+├── README.md
+├── requirements.txt
+├── .gitignore
+│
+└── model/
+    ├── final_random_forest.pkl
+    ├── encoders.pkl
+    ├── features.pkl
+    └── processed_data.pkl
+```
+
+Model files are kept outside GitHub using `.gitignore`.
+
+---
+
+## 🛠️ Technologies Used
+
+* Python
+* Pandas
+* NumPy
+* Scikit-Learn
+* XGBoost
+* LightGBM
+* CatBoost
+* Joblib
+* Matplotlib
+* Seaborn
+* Jupyter Notebook
+* Streamlit
+* Git & GitHub
+
+---
+
+## ▶️ Run Locally
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/ShreshthaPandey/JOSAA-collage-predictor.git
+cd JOSAA-collage-predictor
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Make sure the Scikit-Learn version matches the model's training environment.
+
+```text
+scikit-learn==1.9.0
+```
+
+### 3. Run Streamlit
+
+```bash
+streamlit run app.py
+```
+
+---
+
+## 📌 Limitations
+
+* Predictions are estimates based on historical counselling data.
+* Actual JOSAA cutoffs can change due to competition, seats, preferences, and counselling trends.
+* The model should not be treated as an official JOSAA admission prediction.
+* Chance categories are heuristic rather than calibrated admission probabilities.
+* Historical data availability affects prediction quality.
+
+---
+
+## 🔮 Future Improvements
+
+* Add college/branch search and advanced filters.
+* Add cutoff trend visualizations.
+* Add personalized college comparison.
+* Add probability calibration for admission chances.
+* Add more recent counselling data.
+* Deploy the application online.
+* Add separate prediction models for different institute types.
+
+---
+
+## 👨‍💻 Author
+
+**Shreshtha Pandey**
+
+B.Tech CSE — Kamla Nehru Institute of Technology, Sultanpur
+
+🔗 **GitHub:**
+https://github.com/ShreshthaPandey/JOSAA-collage-predictor
+
+---
+
+## ⭐ Acknowledgement
+
+Dataset sourced from Kaggle's JOSAA Opening and Closing Ranks dataset.
+
+If you find this project useful, consider giving the repository a ⭐.
