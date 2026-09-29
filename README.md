@@ -1,12 +1,8 @@
-
-
 # 🎓 JOSAA College Predictor
 
 A Machine Learning based **JOSAA College Predictor** that estimates college closing ranks and provides personalized college and branch recommendations based on a student's JEE rank, category, quota, gender, and PwD status.
 
 The project uses historical JOSAA counselling data from **2020–2026** and a **Random Forest Regression** model.
-
----
 
 ## 🚀 Features
 
@@ -18,7 +14,8 @@ The project uses historical JOSAA counselling data from **2020–2026** and a **
 * 🔍 Category, quota, gender and PwD filtering
 * 📈 Historical average, trend and volatility features
 * 🎯 HIGH / MEDIUM / LOW chance classification
-* 🖥️ Interactive Streamlit web interface
+* 🖥️ Interactive Streamlit web application
+* 🌐 Deployed using Streamlit
 * 📋 College and branch recommendations in table format
 
 ---
@@ -29,7 +26,7 @@ The project uses historical JOSAA counselling data from **2020–2026** and a **
 
 **Years used:** 2020–2026
 
-Original data contained counselling information such as:
+The dataset contains information such as:
 
 * Institute
 * Academic Program
@@ -40,8 +37,6 @@ Original data contained counselling information such as:
 * Closing Rank
 * Round
 * Year
-
-Rows containing invalid rank values such as `P` and missing/infinite ranks were cleaned before model training.
 
 ---
 
@@ -57,31 +52,30 @@ The following preprocessing steps were performed:
 6. Removed missing/infinite rank values.
 7. Kept counselling rounds up to Round 5.
 8. Cleaned column names and categorical values.
-9. Created additional features such as:
-
-   * `is_pwd`
-   * `Institute_Type`
+9. Created additional features such as `is_pwd` and `Institute_Type`.
 
 Institute types include:
 
-* IIT
-* NIT
-* IIIT
-* GFTI
+```text
+IIT
+NIT
+IIIT
+GFTI
+```
 
 ---
 
 ## ⚙️ Feature Engineering
 
-Historical features were created without using the current/future closing rank:
+Historical features were created using previous rank information:
 
-* `hist_avg_closing` — rolling historical average closing rank
+* `hist_avg_closing` — historical average closing rank
 * `hist_trend` — historical closing-rank trend
 * `hist_volatility` — historical closing-rank variation
 
 Categorical features were encoded using `LabelEncoder`.
 
-### Final Model Features
+### Final Features
 
 ```text
 institute_enc
@@ -107,20 +101,20 @@ Closing_Rank
 
 ---
 
-## 🤖 Machine Learning Models
+## 🤖 Machine Learning
 
-Several regression models were evaluated:
+Multiple regression models were evaluated:
 
-| Model         |         MAE |     RMSE |         R² |
-| ------------- | ----------: | -------: | ---------: |
-| Random Forest | **1655.24** | 12292.44 | **0.9013** |
-| XGBoost       |     1951.64 | 13517.05 |     0.8806 |
-| LightGBM      |     1967.25 | 12817.27 |     0.8926 |
-| CatBoost      |     2098.24 | 13459.51 |     0.8816 |
+| Model             |         MAE |         RMSE |         R² |
+| ----------------- | ----------: | -----------: | ---------: |
+| **Random Forest** | **1655.24** | **12292.44** | **0.9013** |
+| XGBoost           |     1951.64 |     13517.05 |     0.8806 |
+| LightGBM          |     1967.25 |     12817.27 |     0.8926 |
+| CatBoost          |     2098.24 |     13459.51 |     0.8816 |
 
-Based on the time-based evaluation, **Random Forest Regression** was selected as the final model.
+### Final Model
 
-Final configuration:
+**Random Forest Regressor**
 
 ```python
 RandomForestRegressor(
@@ -134,14 +128,23 @@ RandomForestRegressor(
 )
 ```
 
-### Final Evaluation
+### 📊 Model Metrics
+
+The model was evaluated using a **time-based split**, with previous years used for training and **2026 used as the test year**.
 
 ```text
 Training R² : 0.9868
 Testing R²  : 0.9045
+
+Test MAE    : 1655.24
+Test RMSE   : 12292.44
 ```
 
-The model was evaluated using a time-based split, with historical years used for training and **2026 as the test year**.
+**R²** measures how much variation in closing rank is explained by the model.
+
+**MAE** represents the average absolute difference between actual and predicted closing ranks.
+
+**RMSE** gives greater weight to larger prediction errors.
 
 ---
 
@@ -158,53 +161,52 @@ Gender
 PwD Status
 ```
 
-The system then:
+The prediction workflow is:
 
 ```text
 User Input
     ↓
-Filter eligible institutes
+Exam & Eligibility Filtering
     ↓
-Apply category/quota/gender/PwD filters
+Category / Quota / Gender / PwD Filtering
     ↓
-Generate model predictions
+Feature Preparation
     ↓
-Compare student rank with predicted closing rank
+ML Closing Rank Prediction
     ↓
-Assign Chance
+Compare Student Rank with Predicted Closing Rank
     ↓
-Display College + Branch
+HIGH / MEDIUM / LOW
+    ↓
+College & Branch Recommendations
 ```
 
-Chance levels:
+For **JEE Advanced**, IITs are considered.
 
-* 🟢 **HIGH**
-* 🟡 **MEDIUM**
-* 🔴 **LOW**
-
-These are guidance categories based on the predicted closing rank and are **not guaranteed admission probabilities**.
+For **JEE Main**, non-IIT institutes such as NITs, IIITs and GFTIs are considered.
 
 ---
 
 ## 🖥️ Streamlit Application
 
-The application contains two main screens.
+The project is deployed as an interactive **Streamlit web application**.
 
-### 1. Landing Page
+### Landing Page
 
 * Project introduction
 * ML/data-driven highlights
 * Blue gradient UI
+* Feature cards
 * **LET'S START** button
 
-### 2. Predictor Dashboard
+### Predictor Dashboard
 
-Users enter their JEE details and receive:
+Users enter their details and receive results in the form:
 
 | College Name | Branch | College Type | Chances |
 | ------------ | ------ | ------------ | ------- |
 
-The interface uses a clean blue-gradient theme with card-based components.
+The application uses a clean blue-gradient design with card-based components.
 
 ---
 
@@ -225,8 +227,6 @@ JOSAA-collage-predictor/
     ├── features.pkl
     └── processed_data.pkl
 ```
-
-Model files are kept outside GitHub using `.gitignore`.
 
 ---
 
@@ -250,26 +250,20 @@ Model files are kept outside GitHub using `.gitignore`.
 
 ## ▶️ Run Locally
 
-### 1. Clone the repository
+Clone the repository:
 
 ```bash
 git clone https://github.com/ShreshthaPandey/JOSAA-collage-predictor.git
 cd JOSAA-collage-predictor
 ```
 
-### 2. Install dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Make sure the Scikit-Learn version matches the model's training environment.
-
-```text
-scikit-learn==1.9.0
-```
-
-### 3. Run Streamlit
+Run the Streamlit application:
 
 ```bash
 streamlit run app.py
@@ -280,22 +274,22 @@ streamlit run app.py
 ## 📌 Limitations
 
 * Predictions are estimates based on historical counselling data.
-* Actual JOSAA cutoffs can change due to competition, seats, preferences, and counselling trends.
-* The model should not be treated as an official JOSAA admission prediction.
-* Chance categories are heuristic rather than calibrated admission probabilities.
-* Historical data availability affects prediction quality.
+* Actual JOSAA cutoffs can change based on competition, seats, preferences and counselling trends.
+* The model is not an official JOSAA admission prediction system.
+* Chance categories are heuristic estimates and not calibrated admission probabilities.
+* Prediction quality depends on historical data availability.
 
 ---
 
 ## 🔮 Future Improvements
 
-* Add college/branch search and advanced filters.
+* Add college and branch search.
 * Add cutoff trend visualizations.
-* Add personalized college comparison.
-* Add probability calibration for admission chances.
-* Add more recent counselling data.
-* Deploy the application online.
-* Add separate prediction models for different institute types.
+* Add college comparison.
+* Improve chance calibration.
+* Add newer counselling data.
+* Add more personalized recommendations.
+* Improve deployment and scalability.
 
 ---
 
@@ -305,8 +299,13 @@ streamlit run app.py
 
 B.Tech CSE — Kamla Nehru Institute of Technology, Sultanpur
 
-🔗 **GitHub:**
+### 🔗 GitHub
+
 https://github.com/ShreshthaPandey/JOSAA-collage-predictor
+
+### 🌐 Deployment
+
+The application is deployed using **Streamlit**.
 
 ---
 
@@ -315,3 +314,4 @@ https://github.com/ShreshthaPandey/JOSAA-collage-predictor
 Dataset sourced from Kaggle's JOSAA Opening and Closing Ranks dataset.
 
 If you find this project useful, consider giving the repository a ⭐.
+
